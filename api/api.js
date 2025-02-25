@@ -10,3 +10,6 @@ async function RequestData() {
 }
 
 RequestData();
+
+export const artistArray = responseArtists.data;
+export const songsArray = responseSongs.data;
