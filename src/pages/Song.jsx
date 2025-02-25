@@ -1,62 +1,91 @@
 import React from "react";
 import Player from "../components/Player";
 import { Link, useParams } from "react-router-dom";
-import { songsArray } from "../assets/database/songs";
-import { artistArray } from "../assets/database/artists";
+import { songsArray } from "../../api/api";
+import { artistArray } from "../../api/api";
+import { useState, useEffect } from "react";
 
 const Song = () => {
   const { id } = useParams();
 
-  const { image, name, duration, artist, audio } = songsArray.filter(
-    (currentSongObj) => currentSongObj._id === id
-  )[0];
+  const [song, setSong] = useState(null); // Estado para armazenar a música atual
+  const [artistObj, setArtistObj] = useState(null); // Estado para armazenar o artista
+  const [songsArrayFromArtist, setSongsArrayFromArtist] = useState([]); // Estado para armazenar as músicas do artista
+  const [randomIdFromArtist, setRandomIdFromArtist] = useState(null); // Estado para armazenar o ID aleatório
+  const [randomId2FromArtist, setRandomId2FromArtist] = useState(null); // Estado para armazenar o segundo ID aleatório
+  const [previusIdFromArtist, setPreviusIdFromArtist] = useState(null); // Estado para armazenar o ID anterior
+  const [nexIdFromArtist, setNexIdFromArtist] = useState(null); // Estado para armazenar o próximo ID
 
-  const artistObj = artistArray.filter(
-    (currentArtistObj) => currentArtistObj.name === artist
-  )[0];
+  useEffect(() => {
+    // Função assíncrona para carregar os dados
+    const loadData = async () => {
+      try {
+        // Carregar songsArray e artistArray
+        const songs = await songsArray();
+        const artists = await artistArray();
 
-  const songsArrayFromArtist = songsArray.filter(
-    (currentSongObj) => currentSongObj.artist === artist
-  );
+        // Encontrar a música pelo ID
+        const currentSong = songs.find(
+          (currentSongObj) => currentSongObj._id === id
+        );
 
-  const randomIndex = Math.floor(
-    Math.random() * (songsArrayFromArtist.length - 1)
-  );
+        if (currentSong) {
+          setSong(currentSong); // Definir a música no estado
 
-  const randomIdFromArtist = songsArrayFromArtist[randomIndex]._id;
+          // Encontrar o artista da música
+          const currentArtist = artists.find(
+            (currentArtistObj) => currentArtistObj.name === currentSong.artist
+          );
+          setArtistObj(currentArtist); // Definir o artista no estado
 
-  const randomIndex2 = Math.floor(
-    Math.random() * (songsArrayFromArtist.length - 1)
-  );
+          // Filtrar as músicas do artista
+          const filteredSongs = songs.filter(
+            (currentSongObj) => currentSongObj.artist === currentSong.artist
+          );
+          setSongsArrayFromArtist(filteredSongs); // Definir as músicas do artista no estado
 
-  const randomId2FromArtist = songsArrayFromArtist[randomIndex2]._id;
+          // Escolher músicas aleatórias
+          const randomIndex = Math.floor(Math.random() * filteredSongs.length);
+          const randomIndex2 = Math.floor(Math.random() * filteredSongs.length);
+          setRandomIdFromArtist(filteredSongs[randomIndex]._id);
+          setRandomId2FromArtist(filteredSongs[randomIndex2]._id);
 
-  // ? Tentativa de fazer um anterior e proximo :
-  // * funcão de passar para o proximo está funcionando!
+          // Encontrar índices para anterior e próximo
+          const currentIndex = filteredSongs.findIndex(
+            (song) => song._id === id
+          );
+          const previusIndex =
+            currentIndex === 0 ? filteredSongs.length - 1 : currentIndex - 1;
+          const nextIndex =
+            currentIndex === filteredSongs.length - 1 ? 0 : currentIndex + 1;
 
-  const currentIndex = songsArrayFromArtist.findIndex(
-    (song) => song._id === id
-  );
+          setPreviusIdFromArtist(filteredSongs[previusIndex]._id);
+          setNexIdFromArtist(filteredSongs[nextIndex]._id);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+      }
+    };
 
-  const previusIndex =
-    currentIndex === 0 ? songsArrayFromArtist.length - 1 : currentIndex - 1;
+    loadData(); // Chamar a função para carregar os dados
+  }, [id]); // Dependência: id
 
-  const nextIndex =
-    currentIndex === songsArrayFromArtist.length - 1 ? 0 : currentIndex + 1;
+  // Se a música ainda não foi carregada, exibir uma mensagem de carregamento
+  if (!song || !artistObj) {
+    return <div>Carregando...</div>;
+  }
 
-  const previusIdFromArtist = songsArrayFromArtist[previusIndex]._id;
-
-  const nexIdFromArtist = songsArrayFromArtist[nextIndex]._id;
-
-  // ? Tentativa de fazer um repeat :
+  const imageUrl = song.image || ""; // Usar uma string vazia como fallback
+  const duration = song.duration || 0;
+  const audio = song.audio || undefined;
 
   return (
     <div className="song">
       <div className="song__container">
         <div className="song__image-container">
           <img
-            src={image}
-            alt={`Imagem da música ${name} do artista ${artist}`}
+            src={imageUrl}
+            alt={`Imagem da música ${song.name} do artista ${song.artist}`}
           />
         </div>
       </div>
@@ -67,7 +96,7 @@ const Song = () => {
             width={75}
             height={75}
             src={artistObj.image}
-            alt={`Imagem do artista ${artist}`}
+            alt={`Imagem do artista ${song.artist}`}
           />
         </Link>
 
@@ -81,8 +110,8 @@ const Song = () => {
         />
 
         <div>
-          <p className="song__name">{name}</p>
-          <p>{artist}</p>
+          <p className="song__name">{song.name}</p>
+          <p>{song.artist}</p>
         </div>
       </div>
     </div>

@@ -3,41 +3,72 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlay } from "@fortawesome/free-solid-svg-icons";
 import { Link, useParams } from "react-router-dom";
 import SongList from "../components/SongList";
-import { artistArray } from "../assets/database/artists";
-import { songsArray } from "../assets/database/songs";
+import { artistArray, songsArray } from "../../api/api";
+import { useState, useEffect } from "react";
 
 const Artist = ({}) => {
   const { id } = useParams();
 
-  const { name, banner } = artistArray.filter(
-    (currentArtistObj) => currentArtistObj._id === id
-  )[0];
+  const [artist, setArtist] = useState(null); // Estado para armazenar o artista
+  const [songsFromArtist, setSongsFromArtist] = useState([]); // Estado para armazenar as músicas do artista
+  const [randomIdFromArtist, setRandomIdFromArtist] = useState(null); // Estado para armazenar o ID aleatório
 
-  const songsArrayFromArtist = songsArray.filter(
-    (currentSongObj) => currentSongObj.artist === name
-  );
+  useEffect(() => {
+    // Função assíncrona para carregar os dados
+    const loadData = async () => {
+      try {
+        // Carregar artistArray e songsArray
+        const artists = await artistArray();
+        const songs = await songsArray();
 
-  const randomIndex = Math.floor(
-    Math.random() * (songsArrayFromArtist.length - 1)
-  );
+        // Encontrar o artista pelo ID
+        const currentArtist = artists.find(
+          (currentArtistObj) => currentArtistObj._id === id
+        );
 
-  const randomIdFromArtist = songsArrayFromArtist[randomIndex]._id;
+        if (currentArtist) {
+          setArtist(currentArtist); // Definir o artista no estado
+
+          // Filtrar as músicas do artista
+          const filteredSongs = songs.filter(
+            (currentSongObj) => currentSongObj.artist === currentArtist.name
+          );
+          setSongsFromArtist(filteredSongs); // Definir as músicas no estado
+
+          // Escolher uma música aleatória
+          const randomIndex = Math.floor(Math.random() * filteredSongs.length);
+          setRandomIdFromArtist(filteredSongs[randomIndex]._id); // Usar _id em vez de id
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+      }
+    };
+
+    loadData(); // Chamar a função para carregar os dados
+  }, [id]); // Dependência: id
+
+  // Se o artista ainda não foi carregado, exibir uma mensagem de carregamento
+  if (!artist) {
+    return <div>Carregando...</div>;
+  }
+
+  const bannerUrl = artist.banner || "";
 
   return (
     <div className="artist">
       <div
         className="artist__header"
         style={{
-          backgroundImage: `linear-gradient(to bottom, var(--_shade), var(--_shade)),url(${banner})`,
+          backgroundImage: `linear-gradient(to bottom, var(--_shade), var(--_shade)),url(${bannerUrl})`,
         }}
       >
-        <h2 className="artist__title">{name}</h2>
+        <h2 className="artist__title">{artist.name}</h2>
       </div>
 
       <div className="artist__body">
         <h2>Populares</h2>
 
-        <SongList songsArray={songsArrayFromArtist} />
+        <SongList songsArray={songsFromArtist} />
       </div>
 
       <Link to={`/song/${randomIdFromArtist}`}>
