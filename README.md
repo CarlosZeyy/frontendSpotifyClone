@@ -3,7 +3,7 @@ Projeto de clone da interface do Spotify, desenvolvido com React.js e Tailwind C
 
 📸 Demonstração
 
-<img src="https://i.ibb.co/23w99bMY/Print-Spotity1.png" alt="Print Spotity" border="0" width='500px'>
+<img src="https://i.ibb.co/whTkkvQr/Print-Spotity1.png" alt="Print Spotity" border="0" width='500px'>
 <img src="https://i.ibb.co/XftR8Gwc/Print-Spotity4.png" alt="Print Spotity" border="0" width='500px'>
 <img src="https://i.ibb.co/vvPtWD5r/Print-Spotity2.png" alt="Print Spotity" border="0" width='500px'>
 
