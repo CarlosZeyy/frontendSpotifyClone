@@ -1,5 +1,5 @@
 🎧 Spotify Clone - Frontend
-Projeto de clone da interface do Spotify, desenvolvido com React.js e Tailwind CSS. O objetivo é replicar o visual moderno e responsivo do player web do Spotify, praticando habilidades em componentes reutilizáveis, design responsivo e gerenciamento de estado.
+Projeto de clone da interface do Spotify, desenvolvido com React.js, CSS e Node.js. O objetivo é replicar o visual moderno e responsivo do player web do Spotify, praticando habilidades em componentes reutilizáveis, design responsivo e gerenciamento de estado.
 
 📸 Demonstração
 
